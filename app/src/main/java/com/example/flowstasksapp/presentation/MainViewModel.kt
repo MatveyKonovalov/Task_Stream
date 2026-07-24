@@ -3,8 +3,7 @@ package com.example.flowstasksapp.presentation
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.flowstasksapp.data.repository.Repository
-import com.example.flowstasksapp.domain.RepositoryImpl
+import com.example.flowstasksapp.domain.Repository
 import com.example.flowstasksapp.domain.Task
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -23,7 +22,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val repository: RepositoryImpl
+    private val repository: Repository
 ) : ViewModel() {
 
     // Дата

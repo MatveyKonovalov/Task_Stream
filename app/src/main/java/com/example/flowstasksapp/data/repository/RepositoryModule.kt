@@ -1,8 +1,6 @@
 package com.example.flowstasksapp.data.repository
 
-import com.example.flowstasksapp.data.database.TaskDao
-import com.example.flowstasksapp.data.mappers.TaskMapper
-import com.example.flowstasksapp.domain.RepositoryImpl
+import com.example.flowstasksapp.domain.Repository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -15,5 +13,5 @@ import javax.inject.Singleton
 abstract class RepositoryModule {
     @Binds
     @Singleton
-    abstract fun bindRepository(repository: Repository): RepositoryImpl
+    abstract fun bindRepository(repository: RepositoryImpl): Repository
 }

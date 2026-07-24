@@ -2,16 +2,16 @@ package com.example.flowstasksapp.data.repository
 
 import com.example.flowstasksapp.data.database.TaskDao
 import com.example.flowstasksapp.data.mappers.TaskMapper
-import com.example.flowstasksapp.domain.RepositoryImpl
+import com.example.flowstasksapp.domain.Repository
 import com.example.flowstasksapp.domain.Task
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-class Repository @Inject constructor(
+class RepositoryImpl @Inject constructor(
     private val taskMapper: TaskMapper,
     private val taskDao: TaskDao
-): RepositoryImpl {
+): Repository {
     override fun getTasksByDate(date: String): Flow<List<Task>> {
         return taskDao.getTasksByDate(date).map { entities ->
             taskMapper.toDomain(entities)

@@ -89,4 +89,8 @@ dependencies {
 
     // Mock
     testImplementation("io.mockk:mockk:${mockVersion}")
+
+
+    // WorkManager с поддержкой корутин
+    implementation("androidx.work:work-runtime-ktx:2.9.1")
 }

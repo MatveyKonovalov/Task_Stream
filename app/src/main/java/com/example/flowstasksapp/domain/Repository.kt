@@ -7,4 +7,6 @@ interface Repository {
     suspend fun addTask(task: Task): Long
     suspend fun updateTask(task: Task)
     suspend fun deleteTaskById(taskId: Long): Int
+
+    suspend fun getTaskWithNotification(): List<Task>
 }

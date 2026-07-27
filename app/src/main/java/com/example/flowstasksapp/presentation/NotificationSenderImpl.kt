@@ -3,64 +3,60 @@ package com.example.flowstasksapp.presentation
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import androidx.compose.runtime.snapshots.toInt
 import androidx.core.app.NotificationCompat
 import com.example.flowstasksapp.MainActivity
 import com.example.flowstasksapp.R
+import com.example.flowstasksapp.domain.NotificationSender
+import javax.inject.Inject
 
-class NotificationReceiver : BroadcastReceiver() {
+class NotificationSenderImpl @Inject constructor(private val context: Context) :
+    NotificationSender {
     companion object {
-        const val CHANNEL_ID = "habit_reminder_channel"
-        const val CHANNEL_NAME = "Напоминания о задачах"
-        const val NOTIFICATION_ID = 1001L
+        const val CHANNEL_ID = "task_stream_receiver"
+        const val CHANNEL_NAME = "Напоминание о задаче"
     }
 
-    override fun onReceive(context: Context, intent: Intent) { // Получаем таску и отправляем её
-        val title = intent.getStringExtra("title") ?: "Напоминание о задаче"
-        val task = intent.getStringExtra("task")
-        val id = intent.getLongExtra("taskid", NOTIFICATION_ID)
-
-        task?.let { message ->
-            sendNotification(context, title, message, id)
-        }
-
-    }
-
-    private fun sendNotification(context: Context, title: String, task: String, id: Long) {
-        val notificationManager =
-            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-        var channel = notificationManager.getNotificationChannel(CHANNEL_ID)
-        if (channel == null){
-            channel = NotificationChannel(
+    private fun createNotificationChannel(
+        notificationManager: NotificationManager,
+    ) {
+        val channel =
+            NotificationChannel(
                 CHANNEL_ID,
                 CHANNEL_NAME,
                 NotificationManager.IMPORTANCE_HIGH
-            ).apply{
-                description = "Напоминание о задаче"
+            ).apply {
                 enableVibration(true)
                 vibrationPattern = longArrayOf(0, 500, 200, 500)
                 setShowBadge(true)
                 lockscreenVisibility = NotificationCompat.VISIBILITY_PUBLIC
-            }
-            notificationManager.createNotificationChannel(channel)
-        }
 
-        // Интент для открытия приложения
+            }
+        notificationManager.createNotificationChannel(channel)
+    }
+
+    override fun sendNotification(title: String, task: String, taskId: Long) {
+        val notificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        // Создаём канал
+        createNotificationChannel(notificationManager)
+
+        // Intent для открытия приложения
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            putExtra("task_id", taskId)
         }
+
         val pendingIntent = PendingIntent.getActivity(
             context,
-            id.toInt(),
+            taskId.toInt(), // id сообщения
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // Создаём Intent
+        // Создаём уведомление
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_adaptive)
             .setContentTitle(title)
@@ -72,6 +68,6 @@ class NotificationReceiver : BroadcastReceiver() {
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .build()
 
-        notificationManager.notify(id.toInt(), notification)
+        notificationManager.notify(taskId.toInt(), notification)
     }
 }

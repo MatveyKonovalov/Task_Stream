@@ -2,7 +2,7 @@ package com.example.flowstasksapp;
 
 import static org.junit.Assert.assertEquals;
 
-import com.example.flowstasksapp.data.database.TaskEntity;
+import com.example.flowstasksapp.data.database.entities.TaskEntity;
 import com.example.flowstasksapp.data.mappers.CategoryMapper;
 import com.example.flowstasksapp.data.mappers.DateMapper;
 import com.example.flowstasksapp.data.mappers.PriorityMapper;

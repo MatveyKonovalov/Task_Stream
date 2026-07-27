@@ -1,6 +1,7 @@
 package com.example.flowstasksapp.data.database
 
 import android.content.Context
+import com.example.flowstasksapp.data.database.daos.TaskDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

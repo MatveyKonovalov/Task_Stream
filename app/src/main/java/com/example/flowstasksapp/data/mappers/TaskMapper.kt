@@ -1,6 +1,6 @@
 package com.example.flowstasksapp.data.mappers
 
-import com.example.flowstasksapp.data.database.TaskEntity
+import com.example.flowstasksapp.data.database.entities.TaskEntity
 import com.example.flowstasksapp.domain.Task
 import javax.inject.Inject
 

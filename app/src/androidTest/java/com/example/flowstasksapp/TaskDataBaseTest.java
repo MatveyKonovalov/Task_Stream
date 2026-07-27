@@ -8,9 +8,9 @@ import androidx.room.Room;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
-import com.example.flowstasksapp.data.database.TaskDao;
+import com.example.flowstasksapp.data.database.daos.TaskDao;
 import com.example.flowstasksapp.data.database.TaskDateBase;
-import com.example.flowstasksapp.data.database.TaskEntity;
+import com.example.flowstasksapp.data.database.entities.TaskEntity;
 
 import org.junit.After;
 import org.junit.Before;

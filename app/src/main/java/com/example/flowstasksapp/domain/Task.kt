@@ -32,7 +32,8 @@ data class Task(
     val priority: Priority = Priority.Easy,
     val category: Category = Category.Unknown,
     val isComplete: Boolean = false,
-    val date: LocalDate = LocalDate.now()
+    val date: LocalDate = LocalDate.now(),
+    val notificationTime: Pair<Int, Int> = Pair(0, 0) // часы, минуты
 ) {
     @JvmName("getDateString")
     fun getDate(): String {

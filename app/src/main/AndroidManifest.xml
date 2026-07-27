@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+
     <application
         android:name="com.example.flowstasksapp.MyApplication"
         android:allowBackup="true"
@@ -28,7 +30,7 @@
         </activity>
 
         <receiver
-            android:name=".presentation.NotificationReceiver"
+            android:name=".presentation.AlarmReceiver"
             android:exported="false" />
         <receiver
             android:name=".presentation.BootReceiver"

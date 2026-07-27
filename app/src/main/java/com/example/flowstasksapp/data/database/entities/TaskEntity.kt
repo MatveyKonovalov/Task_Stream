@@ -1,4 +1,4 @@
-package com.example.flowstasksapp.data.database
+package com.example.flowstasksapp.data.database.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

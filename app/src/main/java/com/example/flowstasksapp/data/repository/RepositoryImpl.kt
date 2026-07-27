@@ -1,6 +1,6 @@
 package com.example.flowstasksapp.data.repository
 
-import com.example.flowstasksapp.data.database.TaskDao
+import com.example.flowstasksapp.data.database.daos.TaskDao
 import com.example.flowstasksapp.data.mappers.TaskMapper
 import com.example.flowstasksapp.domain.Repository
 import com.example.flowstasksapp.domain.Task
@@ -21,4 +21,7 @@ class RepositoryImpl @Inject constructor(
     override suspend fun addTask(task: Task): Long = taskDao.addTask(taskMapper.toEntity(task))
     override suspend fun updateTask(task: Task) = taskDao.updateTask(taskMapper.toEntity(task))
     override suspend fun deleteTaskById(taskId: Long): Int = taskDao.deleteTask(taskId)
+    override suspend fun getTaskWithNotification(): List<Task> {
+        return emptyList()
+    }
 }

@@ -16,6 +16,9 @@ interface NotificationDao {
     @Delete
     suspend fun deleteNotification(notificationsEntity: NotificationsEntity): Int
 
+    @Query("DELETE FROM notifications WHERE taskId = :taskId")
+    suspend fun deleteNotificationByTaskId(taskId: Long): Int
+
     @Query("SELECT * FROM notifications LEFT JOIN tasks ON tasks.id = notifications.taskId")
     suspend fun getAllNotificationTasks(): List<NotificationTaskEntity>
 }

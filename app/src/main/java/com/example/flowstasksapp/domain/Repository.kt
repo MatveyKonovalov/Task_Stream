@@ -10,4 +10,6 @@ interface Repository {
 
     suspend fun getTaskWithNotification(): List<TaskNotification>
     suspend fun addNotification(taskId: Long, hour: Int, minute: Int): Long
+
+    suspend fun getTaskById(taskId: Long): Task
 }

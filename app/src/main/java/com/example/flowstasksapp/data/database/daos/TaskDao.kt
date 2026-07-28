@@ -29,7 +29,8 @@ interface TaskDao {
     WHERE tasks.id = :taskId 
 """)
     suspend fun getTaskWithNotification(taskId: Long): TaskNotificationsEntity?
-
+    @Query("SELECT * FROM tasks WHERE id = :taskId")
+    suspend fun getTaskById(taskId: Long): TaskEntity
     // Suspend методы для реального кода
     @Insert
     fun addTaskTest(task: TaskEntity): Long

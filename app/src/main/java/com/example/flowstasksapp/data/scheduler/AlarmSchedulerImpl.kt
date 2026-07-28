@@ -11,7 +11,7 @@ import com.example.flowstasksapp.R
 import com.example.flowstasksapp.domain.AlarmScheduler
 import com.example.flowstasksapp.domain.NotificationSender
 import com.example.flowstasksapp.domain.Task
-import com.example.flowstasksapp.presentation.AlarmReceiver
+import com.example.flowstasksapp.presentation.notificationutil.AlarmReceiver
 import java.util.Calendar
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -26,7 +26,7 @@ class AlarmSchedulerImpl @Inject constructor(
         private const val TAG = "AlarmScheduler"
     }
 
-    override fun scheduleTask(task: Task) {
+    override fun scheduleTask(task: Task, hour: Int, minute: Int) {
         // Проверка разрешений
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
@@ -45,8 +45,8 @@ class AlarmSchedulerImpl @Inject constructor(
             set(Calendar.MONTH, task.date.month.value)
             set(Calendar.DAY_OF_MONTH, task.date.dayOfMonth)
 
-            set(Calendar.HOUR_OF_DAY, task.notificationTime.first)
-            set(Calendar.MINUTE, task.notificationTime.second)
+            set(Calendar.HOUR_OF_DAY, hour)
+            set(Calendar.MINUTE, minute)
             set(Calendar.SECOND, 0)
             set(Calendar.MILLISECOND, 0)
         }

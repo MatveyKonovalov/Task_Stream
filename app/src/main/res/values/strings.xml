@@ -30,6 +30,7 @@
     <string name="error_in_make_toast">Введите описание</string>
     <string name="update_title">Редактировать задачу</string>
     <string name="notification_about_task">Напоминание о задаче</string>
+
     <!--Приоритеты -->
     <string name="easy_priority">Низкий</string>
     <string name="medium_priority">Средний</string>

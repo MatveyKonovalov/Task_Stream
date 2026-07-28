@@ -33,6 +33,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.flowstasksapp.R
 import com.example.flowstasksapp.domain.Task
+import com.example.flowstasksapp.presentation.components.BottomSheetExample
 import com.example.flowstasksapp.presentation.components.ShowDialog
 import com.example.flowstasksapp.presentation.components.TaskCard
 import com.example.flowstasksapp.presentation.components.WeeklyStrip
@@ -47,7 +48,7 @@ fun MainScreen(viewModel: MainViewModel) {
     val isError by viewModel.isErrorAdd.collectAsStateWithLifecycle() // ,Была ли ошибка
     val isUpdate by viewModel.isOpenUpdateTaskScreen.collectAsStateWithLifecycle() // Открыто ли окно редактирования
     val selectedTask by viewModel.selectedTask.collectAsStateWithLifecycle() // Выбранная задача
-
+    val openNotificationScreen by viewModel.openNotificationScreen.collectAsStateWithLifecycle()
     // Окно добавления
     if (isAdd) {
         ShowDialog(
@@ -73,6 +74,14 @@ fun MainScreen(viewModel: MainViewModel) {
             stringResource(R.string.update_title)
         )
     }
+
+    // Панель добавления времемни реадикторвания
+    BottomSheetExample(
+        openNotificationScreen,
+        viewModel::closeNotificationScreen,
+        viewModel::addNotification
+    )
+
     Column(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -102,7 +111,12 @@ fun MainScreen(viewModel: MainViewModel) {
 
             )
         } else {
-            Tasks(tasks, viewModel::deleteTask, viewModel::openUpdateTaskScreen)
+            Tasks(
+                tasks,
+                viewModel::deleteTask,
+                viewModel::openUpdateTaskScreen,
+                viewModel::openNotificationScreen
+            )
         }
 
     }
@@ -115,6 +129,7 @@ private fun Title(
     funcSetData: (LocalDate) -> Unit,
     btnAdd: () -> Unit = {}
 ) {
+
     Column {
         // Вывод заголовка секции(Календарь)
         Text(
@@ -167,7 +182,8 @@ private fun Title(
 private fun Tasks(
     tasks: List<Task>,
     deleteTask: (Long) -> Unit,
-    funcClick: (Task) -> Unit
+    funcClick: (Task) -> Unit,
+    funLongClick: (Task) -> Unit
 ) {
 
     LazyColumn(
@@ -186,9 +202,10 @@ private fun Tasks(
                 modifier = Modifier.combinedClickable(
                     onClick = { // При коротком нажатии
                         funcClick(task)
-                Log.w("Task edit", "${task.id}")
-                    } , // onLongClick --- при длинном
-                    onDoubleClick = {deleteTask(task.id)} // При двойном нажатии
+                        Log.w("Task edit", "${task.id}")
+                    },
+                    onDoubleClick = { deleteTask(task.id) }, // При двойном нажатии
+                    onLongClick = { funLongClick(task) }
                 )
             )
         }

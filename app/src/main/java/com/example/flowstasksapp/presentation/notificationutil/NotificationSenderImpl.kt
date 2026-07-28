@@ -1,4 +1,4 @@
-package com.example.flowstasksapp.presentation
+package com.example.flowstasksapp.presentation.notificationutil
 
 import android.app.NotificationChannel
 import android.app.NotificationManager

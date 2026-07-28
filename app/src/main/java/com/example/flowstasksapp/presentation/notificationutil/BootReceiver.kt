@@ -1,16 +1,14 @@
-package com.example.flowstasksapp.presentation
+package com.example.flowstasksapp.presentation.notificationutil
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import com.example.flowstasksapp.data.scheduler.AlarmSchedulerImpl
 import com.example.flowstasksapp.domain.AlarmScheduler
 import com.example.flowstasksapp.domain.Repository
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 // Создание ресивера (что сохранить расписание уведомлений после перезагрузки)
@@ -28,9 +26,13 @@ class BootReceiver : BroadcastReceiver() {
         // Если устройство перезагрузилось
         if (intent.action == Intent.ACTION_BOOT_COMPLETED) {
             CoroutineScope(Dispatchers.IO).launch {
-                repository.getTaskWithNotification().forEach { task ->
+                repository.getTaskWithNotification().forEach { taskNotification ->
                     try {
-                        scheduler.scheduleTask(task)
+                        scheduler.scheduleTask(
+                            taskNotification.task,
+                            taskNotification.notification?.hour ?: 7,
+                            taskNotification.notification?.minute ?: 0
+                        )
                     } catch (_: SecurityException) {
                     }
 

@@ -29,5 +29,12 @@ object MappersModule {
         priorityMapper: PriorityMapper
     ): TaskMapper = TaskMapper(priorityMapper, categoryMapper, dateMapper)
 
+    @Provides
+    @Singleton
+    fun provideTaskNotificationMapper(
+        taskMapper: TaskMapper,
+        notificationMapper: NotificationMapper
+    ) = TaskNotificationMapper(taskMapper, notificationMapper)
+
 
 }

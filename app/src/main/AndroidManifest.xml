@@ -30,10 +30,10 @@
         </activity>
 
         <receiver
-            android:name=".presentation.AlarmReceiver"
+            android:name=".presentation.notificationutil.AlarmReceiver"
             android:exported="false" />
         <receiver
-            android:name=".presentation.BootReceiver"
+            android:name=".presentation.notificationutil.BootReceiver"
             android:exported="true" />
 
     </application>

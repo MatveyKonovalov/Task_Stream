@@ -1,4 +1,4 @@
-package com.example.flowstasksapp.presentation
+package com.example.flowstasksapp.presentation.notificationutil
 
 import android.content.Context
 import com.example.flowstasksapp.domain.NotificationSender

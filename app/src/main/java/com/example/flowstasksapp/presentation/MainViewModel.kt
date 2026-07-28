@@ -56,6 +56,14 @@ class MainViewModel @Inject constructor(
     private val _isErrorAdd = MutableStateFlow(false)
     val isErrorAdd = _isErrorAdd.asStateFlow()
 
+    // Флаг открытия окна добавления времени
+    private val _openNotificationScreen = MutableStateFlow(false)
+    val openNotificationScreen = _openNotificationScreen.asStateFlow()
+
+    private val _selectedNotificationTask: MutableStateFlow<Task?> = MutableStateFlow(null)
+    val selectedNotificationTask = _selectedNotificationTask.asStateFlow()
+
+
     // Добавление задачи - БД сама уведомит об изменениях
     fun addTask(task: Task) {
         viewModelScope.launch {
@@ -142,6 +150,34 @@ class MainViewModel @Inject constructor(
             delay(2000L.milliseconds)
             _isErrorAdd.value = false
         }
+    }
+
+    // Открытие и закрытие окна добавления уведомлений
+    fun openNotificationScreen(task: Task) {
+        _selectedNotificationTask.value = task
+        _openNotificationScreen.value = true
+    }
+
+    fun addNotification(hour: Int, minute: Int) {
+        viewModelScope.launch {
+            runCatching {
+                withContext(Dispatchers.IO) {
+                    // TODO
+
+                }
+            }.onFailure {
+                Log.e("MainViewModel: addNotification", "${it.message}")
+            }.onSuccess {
+                Log.d("ViewModel: addNotification", "${selectedNotificationTask.value} add success")
+            }
+
+
+        }
+    }
+
+    fun closeNotificationScreen() {
+        _selectedNotificationTask.value = null
+        _openNotificationScreen.value = false
     }
 }
 

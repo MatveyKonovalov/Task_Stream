@@ -1,6 +1,7 @@
 package com.example.flowstasksapp.data.database
 
 import android.content.Context
+import com.example.flowstasksapp.data.database.daos.NotificationDao
 import com.example.flowstasksapp.data.database.daos.TaskDao
 import dagger.Module
 import dagger.Provides
@@ -26,4 +27,9 @@ object DateBaseModule {
     @Provides
     @Singleton
     fun provideDataBaseDao(taskDateBase: TaskDateBase): TaskDao = taskDateBase.taskDao()
+
+    @Provides
+    @Singleton
+    fun provideDataBaseNotificationDao(taskDateBase: TaskDateBase): NotificationDao =
+        taskDateBase.notificationDao()
 }

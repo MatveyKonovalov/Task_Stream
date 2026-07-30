@@ -162,7 +162,7 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching {
                 withContext(Dispatchers.IO) {
-                    // TODO
+                    repository.addNotification(_selectedNotificationTask.value!!.id, hour, minute)
 
                 }
             }.onFailure {

@@ -1,8 +1,6 @@
 package com.example.flowstasksapp.presentation.components
 
 import android.Manifest
-import android.R.attr.data
-import android.app.Activity
 import android.app.AlarmManager
 import android.content.Context
 import android.content.Intent
@@ -11,21 +9,11 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.ActivityResult
-import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -45,10 +33,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -66,8 +55,13 @@ fun BottomSheetExample(
 ) {
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
+    var isAllPermission by rememberSaveable { mutableStateOf(false) }
+    val context = LocalContext.current
+    val toastMessage = stringResource(R.string.no_permission)
+    val (isNotificationEnabled, setNotificationEnabled) = remember { mutableStateOf(false) }
+    val backgroundColor = MaterialTheme.colorScheme.background.toArgb()
+    val textColor = MaterialTheme.colorScheme.onBackground.toArgb()
 
-    val (checked, setChecked) = remember { mutableStateOf(false) }
     val timePickerState = rememberTimePickerState(
         initialHour = 7,
         initialMinute = 0,
@@ -82,27 +76,34 @@ fun BottomSheetExample(
         }
     }
 
-
-
     Column {
         if (showBottomSheet || sheetState.isVisible) {
             ModalBottomSheet(
                 onDismissRequest = changeBottomSheet,
                 sheetState = sheetState,
             ) {
-                if (checked) PermissionScreen()
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(15.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Title(checked = checked, onCheckedChange = setChecked)
+                    Title(
+                        checked = isNotificationEnabled,
+                        onCheckedChange = setNotificationEnabled
+                    )
 
-                    // Время
-                    if (checked) {
+                    if (isNotificationEnabled) {
+                        // Показываем экран разрешений только если они еще не получены
+                        if (!isAllPermission) {
+                            PermissionScreen(
+                                onAllPermissionsGranted = {
+                                    isAllPermission = true
+                                }
+                            )
+                        }
+
                         TimeInput(state = timePickerState)
                     }
-
 
                     // Кнопки
                     Column(
@@ -112,9 +113,20 @@ fun BottomSheetExample(
                     ) {
                         Button(
                             onClick = {
-                                if (checked) {
-
-                                    saveNotification(timePickerState.hour, timePickerState.minute)
+                                if (isNotificationEnabled) {
+                                    if (isAllPermission) {
+                                        saveNotification(
+                                            timePickerState.hour,
+                                            timePickerState.minute
+                                        )
+                                    } else {
+                                        showCustomToast(
+                                            context = context,
+                                            message = toastMessage,
+                                            backgroundColor = backgroundColor,
+                                            textColor = textColor
+                                        )
+                                    }
                                 }
                                 scope.launch {
                                     sheetState.hide()
@@ -172,57 +184,124 @@ private fun Title(checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
 }
 
 @Composable
-private fun PermissionScreen() {
+private fun PermissionScreen(
+    onAllPermissionsGranted: () -> Unit
+) {
     val context = LocalContext.current
 
     var notificationGranted by remember { mutableStateOf(false) }
     var exactAlarmGranted by remember { mutableStateOf(false) }
-    var loading by remember { mutableStateOf(false) }
+    var hasCheckedPermissions by remember { mutableStateOf(false) }
+    val loading = rememberSaveable { mutableStateOf(true) }
 
-    // Проверка Post_Notification
+    // Launcher для POST_NOTIFICATIONS (только для Android 13+)
     val notificationLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) { notificationGranted = it }
+    ) { isGranted ->
+        notificationGranted = isGranted
+    }
 
-    // Проверка Schedule_Notification
+    // Launcher для точных будильников (только для Android 12+)
     val alarmSettingsLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) {
         exactAlarmGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             (context.getSystemService(Context.ALARM_SERVICE) as AlarmManager).canScheduleExactAlarms()
-        } else true
+        } else {
+            true
+        }
     }
 
-    // Начальная проверка
+    // Первоначальная проверка разрешений
     LaunchedEffect(Unit) {
         notificationGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             ContextCompat.checkSelfPermission(
                 context,
                 Manifest.permission.POST_NOTIFICATIONS
             ) == PackageManager.PERMISSION_GRANTED
-        } else true
+        } else {
+            true // Для версий до Android 13 разрешение не требуется
+        }
 
         exactAlarmGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             (context.getSystemService(Context.ALARM_SERVICE) as AlarmManager).canScheduleExactAlarms()
-        } else true
+        } else {
+            true // Для версий до Android 12 разрешение не требуется
+        }
 
-        loading = true
-
+        hasCheckedPermissions = true
+        loading.value = false
     }
 
-    // Когда что-то не разрешено
-    if (!notificationGranted && loading){
-        notificationLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-    }
-    if (!exactAlarmGranted && loading){
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
-                data = Uri.parse("package:${context.packageName}")
+    // Запрос недостающих разрешений
+    LaunchedEffect(hasCheckedPermissions) {
+        if (hasCheckedPermissions) {
+            // Запрашиваем уведомления только на Android 13+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                if (!notificationGranted) {
+                    notificationLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
             }
-            alarmSettingsLauncher.launch(intent)
+
+            // Запрашиваем точные будильники только на Android 12+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                if (!exactAlarmGranted) {
+                    val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
+                        data = Uri.parse("package:${context.packageName}")
+                    }
+                    alarmSettingsLauncher.launch(intent)
+                }
+            }
         }
     }
 
+    // Отслеживаем изменения разрешений
+    LaunchedEffect(notificationGranted, exactAlarmGranted) {
+        if (hasCheckedPermissions && notificationGranted && exactAlarmGranted) {
+            onAllPermissionsGranted()
+        }
+    }
+
+    // UI для отображения статуса разрешений
+    if (!loading.value) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.permissions_required),
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+
+            // Показываем пункт с уведомлениями только на Android 13+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                PermissionItem(
+                    title = stringResource(R.string.notifications_permission),
+                    granted = notificationGranted,
+                    onRequest = {
+                        notificationLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    }
+                )
+            }
+
+            // Показываем пункт с будильниками только на Android 12+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                PermissionItem(
+                    title = stringResource(R.string.exact_alarm_permission),
+                    granted = exactAlarmGranted,
+                    onRequest = {
+                        val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
+                            data = Uri.parse("package:${context.packageName}")
+                        }
+                        alarmSettingsLauncher.launch(intent)
+                    }
+                )
+            }
+        }
+    }
 
 }
 
@@ -235,10 +314,11 @@ private fun PermissionItem(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = if (granted)
+            containerColor = if (granted) {
                 MaterialTheme.colorScheme.primaryContainer
-            else
+            } else {
                 MaterialTheme.colorScheme.errorContainer
+            }
         )
     ) {
         Row(
@@ -249,17 +329,25 @@ private fun PermissionItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column {
-                Text(title, style = MaterialTheme.typography.titleMedium)
                 Text(
-                    if (granted) "✅ Разрешено" else "❌ Требуется разрешение",
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    text = if (granted) {
+                        "✅ ${stringResource(R.string.permission_granted)}"
+                    } else {
+                        "❌ ${stringResource(R.string.permission_required)}"
+                    },
                     style = MaterialTheme.typography.bodySmall
                 )
             }
             if (!granted) {
                 Button(onClick = onRequest) {
-                    Text("Разрешить")
+                    Text(stringResource(R.string.allow))
                 }
             }
         }
     }
 }
+
